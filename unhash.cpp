@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 
     int results = 0;
 
-    pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
+    pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
     pqxx::work wparts(c);
     pqxx::result rparts = wparts.exec("SELECT text FROM labels_parts WHERE hash = " + to_string(iHash));
     wparts.commit();

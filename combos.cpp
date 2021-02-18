@@ -236,7 +236,7 @@ void loadDB(int numWords, Corpus& corp, UnknownHashes& searchCorp, bool silent =
 {
   cout << endl << "LOAD DB" << endl;
   if (!silent) cout << "Connecting to db..." << endl;
-  pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
+  pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
 
   if (!silent) cout << "Fetching parts..." << endl;
   pqxx::work w(c);
@@ -357,7 +357,7 @@ void threadHelper(
   // set initial position, hence numWords - 1 positions to test
 
  // Connection
-  pqxx::connection cThread{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
+  pqxx::connection cThread{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
   pqxx::work wThread(cThread);
   pqxx::pipeline pThread(wThread);
 
@@ -499,7 +499,7 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords)
 
   // Return only the strings we used
     // Connection
-  pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
+  pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
   pqxx::work w(c);
   pqxx::pipeline p(w);
 
