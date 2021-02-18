@@ -1,0 +1,49 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+"version": "0.2.0",
+"configurations": 
+    [
+        {
+            "name": "Load new parts",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/load",
+            "args": ["-n", "R4", "R5", "R6", "R7", "R8"],
+            "cwd": "${workspaceFolder}",
+            // "environment": [],
+            // "MIMode": "gdb"
+        },
+        {
+            "name": "Hash R6_Enabled",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/hash",
+            "args": ["-l", "R6_Enabled"],
+            "cwd": "${workspaceFolder}",
+            // "environment": [],
+            // "MIMode": "gdb"
+        },
+        {
+            "name": "Hash DelayBetweenEvents",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/hash",
+            "args": ["-l", "DelayBetweenEvents"],
+            "cwd": "${workspaceFolder}",
+            // "environment": [],
+            // "MIMode": "lldb"
+        },
+        {
+            "name": "Hash Delay",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/hash",
+            "args": ["-l", "Delay"],
+            "cwd": "${workspaceFolder}",
+            // "environment": [],
+            // "MIMode": "lldb"
+        }
+    ]
+}
