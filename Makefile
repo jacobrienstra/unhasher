@@ -8,36 +8,36 @@ LIBS += -L/Applications/Postgres.app/Contents/Versions/13/lib -lpqxx -lpq
 
 # name for executable
 HASH = hash
-UNHASH = unhash
+SEARCH = search
 LOAD = load
 TEST = test
 
 
 # space-separated list of header files
 HASHHDRS = hasher.h combos.h
-UNHASHHDRS = hasher.h
+SEARCHHDRS = hasher.h
 LOADHRDS = hasher.h combos.h
 
 # space-separated list of source files
 HASHSRCS = hash.cpp hasher.cpp combos.cpp 
-UNHASHSRCS = unhash.cpp hasher.cpp
+SEARCHSRCS = search.cpp hasher.cpp
 LOADSRCS = load.cpp hasher.cpp combos.cpp 
 TESTSRCS = test.cpp
 
 # automatically generated list of object files
 HASHOBJS = $(HASHSRCS:.cpp=.o)
-UNHASHOBJS = $(UNHASHSRCS:.cpp=.o)
+SEARCHOBJS = $(SEARCHSRCS:.cpp=.o)
 TESTOBJS = $(TESTSRCS:.cpp=.o)
 LOADOBJS = $(LOADSRCS:.cpp=.o)
 
-all: $(HASH) $(UNHASH) $(LOAD) $(TEST) 
+all: $(HASH) $(SEARCH) $(LOAD) $(TEST) 
 
 # default target
 $(HASH): $(HASHOBJS) $(HASHHDRS) Makefile
 	$(CC) $(CPPFLAGS) -o $@ $(HASHOBJS) $(LIBS)
 
-$(UNHASH): $(UNHASHOBJS) $(UNHASHHDRS) Makefile
-	$(CC) $(CPPFLAGS) -o $@ $(UNHASHOBJS) $(LIBS)
+$(SEARCH): $(SEARCHOBJS) $(SEARCHHDRS) Makefile
+	$(CC) $(CPPFLAGS) -o $@ $(SEARCHOBJS) $(LIBS)
 
 $(LOAD): $(LOADOBJS) $(LOADHDRS) Makefile
 	$(CC) $(CPPFLAGS)	-o $@ $(LOADOBJS) $(LIBS)
@@ -47,7 +47,7 @@ $(TEST): $(TESTOBJS) Makefile
 
 # dependencies
 $(HASHOBJS): $(HASHHRDS) Makefile
-$(UNHASHOBJS): $(UNHASHHDRS) Makefile
+$(SEARCHOBJS): $(SEARCHHDRS) Makefile
 $(LOADOBJS): $(LOADHDRS) Makefile
 
 

@@ -26,73 +26,15 @@ using namespace ::boost::multi_index;
 using namespace ::boost::asio;
 using namespace std;
 
-typedef unsigned int uint;
-typedef unsigned long ulong;
-
 
 // Check for only successful inserts (shouldn't be necessarily if entirely new)
-
-/**
- *
- * Struct defs
- *
- **/
-typedef struct WordPart {
-  string word;
-  uint hash;
-
-  WordPart() {
-    word = "";
-    hash = 0;
-  }
-  WordPart(string iWord, uint iHash) {
-    hash = iHash;
-    word = iWord;
-  }
-
-  ~WordPart() {}
-} WordPart;
-
-struct Word {};
-struct Hash {};
-
-typedef multi_index_container<
-  WordPart,
-  indexed_by<
-  random_access<>,
-  hashed_unique<tag<Word>, member <WordPart, string, &WordPart::word> >
-  >
-> Corpus;
-
-typedef struct UnkHash {
-  uint hash;
-  UnkHash(uint iHash) {
-    hash = iHash;
-  }
-
-  ~UnkHash() {}
-} UnkHash;
-
-typedef multi_index_container<
-  UnkHash,
-  indexed_by<
-  hashed_unique<tag<Hash>, member <UnkHash, uint, &UnkHash::hash> >
-  >
-> UnknownHashes;
-
-typedef Corpus::random_access_index RandIndex;
-typedef Corpus::random_access_index::iterator RandIter;
-typedef Corpus::index<Word>::type WordIndex;
-typedef Corpus::index<Word>::type::iterator WordIter;
-typedef UnknownHashes::index<Hash>::type SearchIndex;
-typedef UnknownHashes::index<Hash>::type::iterator SearchIter;
 
 class MainContext {
 public:
   int numWords;
   ulong numThreads;
   Corpus* corp;
-  UnknownHashes* searchCorp;
+  SearchHashes* searchCorp;
   WordIndex* corpWordi;
   ulong cSize;
 
@@ -106,7 +48,7 @@ public:
   mutex* coutLock;
 
   MainContext(int pnumWords, ulong pnumThreads,
-    Corpus* pcorp, UnknownHashes* psearchCorp,
+    Corpus* pcorp, SearchHashes* psearchCorp,
     ulong pglobalMax,
     ulong* pcounters, ulong* pfoundCounters, mutex* pcoutLock)
   {
@@ -211,73 +153,6 @@ void printPerc(ulong* counters, ulong maxCombos, ulong size)
 };
 /* END printPerc */
 /*****************/
-
-
-/**
- *
- * Database functions
- *
-**/
-
-/****************************/
-/* Clears corpus of parts */
-void clearDB(Corpus& corp)
-{
-  corp.clear();
-  cout << "Corpus cleared" << endl;
-}
-/* END clearDB */
-/***************/
-
-/************************************/
-// Loads parts and labels into corpus
-// and unknown hashes into the search corpus numWords
-void loadDB(int numWords, Corpus& corp, UnknownHashes& searchCorp, bool silent = true)
-{
-  cout << endl << "LOAD DB" << endl;
-  if (!silent) cout << "Connecting to db..." << endl;
-  pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
-
-  if (!silent) cout << "Fetching parts..." << endl;
-  pqxx::work w(c);
-  pqxx::result r;
-  string condition = numWords == 3 ? "WHERE NOT source = '{VALUE}'" : "";
-  string query = "SELECT text, hash FROM labels_parts " + condition + " ORDER BY count DESC, source ASC";
-  r = w.exec(query);
-  w.commit();
-
-  if (!silent) cout << "Loading " << r.size() << " parts into corpus..." << endl;
-  for (pqxx::row const& row : r) {
-    corp.get<Word>().insert(WordPart(row[0].c_str(), (uint)row[1].as<int>()));
-  }
-  if (!silent) cout << "Corpus is " << corp.size() << " large" << endl;
-
-  if (numWords == 2)
-  {
-    if (!silent) cout << "Fetching full..." << endl;
-    pqxx::work w2(c);
-    pqxx::result r2 = w2.exec("SELECT text, hash FROM labels_full ORDER BY source ASC");
-    w2.commit();
-    if (!silent) cout << "Loading " << r2.size() << " full into corpus..." << endl;
-    for (auto const& row : r2) {
-      corp.get<Word>().insert(WordPart(row[0].c_str(), (uint)row[1].as<int>()));
-    }
-    if (!silent) cout << "Corpus is " << corp.size() << " large" << endl;
-  }
-
-  if (!silent) cout << "Loading unknown hashes..." << endl;
-  pqxx::work w3(c);
-  pqxx::result r3 = w3.exec("SELECT hash FROM unknown_hashes");
-  w3.commit();
-  for (auto const& row : r3) {
-    searchCorp.insert(UnkHash((uint)row[0].as<int>()));
-  }
-  if (!silent) cout << searchCorp.size() << " unknown hashes loaded" << endl;
-  cout << "Done loading db" << endl << endl;;
-  return;
-}
-/* END loadDB */
-/*************/
 
 /**************************/
 // Recursive comboGenerator
@@ -424,7 +299,7 @@ void threadHelper(
 **/
 /*******************************************************/
 // Finds all combos possible with each of the new strings
-set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords)
+set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, Corpus& corp, SearchHashes& searchCorp)
 {
   cout << endl << "-----------Fn Start-----------" << endl;
   auto start = chrono::high_resolution_clock::now();
@@ -432,10 +307,6 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords)
   cout << "strings: " << iterStr(newStrs) << endl;
 
   mutex coutLock;
-  Corpus corp;
-  UnknownHashes searchCorp;
-
-  loadDB(numWords, corp, searchCorp);
   WordIndex& corpWordi = corp.get<Word>();
 
   // Special corpus with only new (required) parts
@@ -518,18 +389,13 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords)
 
 /************************************************/
 /* Generate all possible combos from the corpus */
-void genAllCombos(int numWords)
+void genAllCombos(int numWords, Corpus& corp, SearchHashes& searchCorp)
 {
   cout << endl << "-----------Fn Start-----------" << endl;
   auto start = chrono::high_resolution_clock::now();
   cout << "ALL COMBOS" << endl << endl;
 
   mutex coutLock;
-  Corpus corp;
-  UnknownHashes searchCorp;
-
-  loadDB(numWords, corp, searchCorp);
-
 
   ulong cSize = corp.size();
   ulong globalMax = pow(cSize, numWords) * 2;

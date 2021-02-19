@@ -5,6 +5,7 @@
 "version": "0.2.0",
 "configurations": 
     [
+
         {
             "name": "Load new parts",
             "type": "lldb",
@@ -44,6 +45,17 @@
             "cwd": "${workspaceFolder}",
             // "environment": [],
             // "MIMode": "lldb"
+        },
+        {
+            "name": "Test",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/test",
+            "args": ["-3"],
+            "cwd": "${workspaceFolder}",
+            // "environment": [],
+            // "MIMode": "lldb"
+            // "749a89fa", "-3", "-s", "78a01dec", "01ade6cf"
         }
     ]
 }
