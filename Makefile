@@ -2,7 +2,7 @@
 CC = clang++
 
 # flags to pass compiler
-CPPFLAGS = -ggdb3 -O0 -fvisibility=hidden -fvisibility-inlines-hidden -std=c++17 -I/Applications/Postgres.app/Contents/Versions/13/include -Wall -Werror -Wextra
+CPPFLAGS = -ggdb3 -O3 -fvisibility=hidden -fvisibility-inlines-hidden -std=c++17 -I/Applications/Postgres.app/Contents/Versions/13/include -Wall -Werror -Wextra
 
 LIBS += -L/Applications/Postgres.app/Contents/Versions/13/lib -lpqxx -lpq
 

@@ -22,7 +22,7 @@ void loadDB(int numWords, Corpus& corp, SearchHashes& searchCorp, bool silent)
 {
   cout << endl << "LOAD DB" << endl;
   if (!silent) cout << "Connecting to db..." << endl;
-  pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
+  pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
   if (!silent) cout << "Connected" << endl;
 
   if (!silent) cout << "Fetching parts..." << endl;

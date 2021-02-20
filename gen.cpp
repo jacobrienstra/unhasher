@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
 
   try
   {
-    pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
+    pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
     if (combos2)
     {
       Corpus corp;
