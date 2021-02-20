@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 
     cout << endl << hashStr << endl << endl;
 
-    pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
+    pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
 
     // Check if calculated hash matches unknown hash
     pqxx::work w1(c);

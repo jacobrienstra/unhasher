@@ -76,7 +76,7 @@ typedef Corpus::index<Word>::type::iterator WordIter;
 typedef SearchHashes::index<Hash>::type SearchIndex;
 typedef SearchHashes::index<Hash>::type::iterator SearchIter;
 
-std::set<std::pair<std::string, unsigned int> > findNewPartCombos(std::set<std::string>& newStrs, int numWords, Corpus& corp, SearchHashes& searchCorp);
+std::set<std::pair<std::string, unsigned int> > findNewPartCombos(std::set<std::string>& newStrs, int numWords, Corpus& corp, SearchHashes& searchCorp, bool insert);
 void genAllCombos(int numWords, Corpus& corp, SearchHashes& searchCorp);
 
 #endif

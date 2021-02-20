@@ -47,10 +47,12 @@ public:
 
   mutex* coutLock;
 
+  bool insert;
+
   MainContext(int pnumWords, ulong pnumThreads,
     Corpus* pcorp, SearchHashes* psearchCorp,
     ulong pglobalMax,
-    ulong* pcounters, ulong* pfoundCounters, mutex* pcoutLock)
+    ulong* pcounters, ulong* pfoundCounters, mutex* pcoutLock, bool pinsert)
   {
     numWords = pnumWords;
     numThreads = pnumThreads;
@@ -65,6 +67,8 @@ public:
 
     useNewCorp = false;
     coutLock = pcoutLock;
+
+    insert = pinsert;
   }
 
   void setNewCorp(Corpus* pnewCorp) {
@@ -232,7 +236,7 @@ void threadHelper(
   // set initial position, hence numWords - 1 positions to test
 
  // Connection
-  pqxx::connection cThread{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
+  pqxx::connection cThread{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
   pqxx::work wThread(cThread);
   pqxx::pipeline pThread(wThread);
 
@@ -299,7 +303,7 @@ void threadHelper(
 **/
 /*******************************************************/
 // Finds all combos possible with each of the new strings
-set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, Corpus& corp, SearchHashes& searchCorp)
+set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, Corpus& corp, SearchHashes& searchCorp, bool insert = true)
 {
   cout << endl << "-----------Fn Start-----------" << endl;
   auto start = chrono::high_resolution_clock::now();
@@ -333,7 +337,7 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
   ulong foundCounters[numThreads];
   for (ulong& counter : foundCounters) counter = 0;
 
-  MainContext context(numWords, numThreads, &corp, &searchCorp, globalMax, counters, foundCounters, &coutLock);
+  MainContext context(numWords, numThreads, &corp, &searchCorp, globalMax, counters, foundCounters, &coutLock, insert);
   context.setNewCorp(&newCorp);
 
   cout << globalMax << " possible combos of " << iterStr(newCorp) << " amid " << numWords - 1 << " other part(s)" << endl;
@@ -370,7 +374,7 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
 
   // Return only the strings we used
     // Connection
-  pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
+  pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
   pqxx::work w(c);
   pqxx::pipeline p(w);
 
@@ -406,7 +410,7 @@ void genAllCombos(int numWords, Corpus& corp, SearchHashes& searchCorp)
   ulong foundCounters[cSize];
   for (ulong& counter : foundCounters) counter = 0;
 
-  MainContext context(numWords, cSize, &corp, &searchCorp, globalMax, counters, foundCounters, &coutLock);
+  MainContext context(numWords, cSize, &corp, &searchCorp, globalMax, counters, foundCounters, &coutLock, true);
 
   cout << std::dec << numWords << " WORDS" << endl;
   cout << globalMax << " possible combinations of " << numWords << " parts" << endl;
