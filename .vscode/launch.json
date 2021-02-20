@@ -17,17 +17,7 @@
             // "MIMode": "gdb"
         },
         {
-            "name": "Load",
-            "type": "lldb",
-            "request": "launch",
-            "program": "${workspaceFolder}/load",
-            "args": ["-p", "R4", "R5", "R6", "R7", "R8"],
-            "cwd": "${workspaceFolder}",
-            // "environment": [],
-            // "MIMode": "gdb"
-        },
-        {
-            "name": "Hash R6_Enabled",
+            "name": "Search",
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/hash",
@@ -37,21 +27,21 @@
             // "MIMode": "gdb"
         },
         {
-            "name": "Hash DelayBetweenEvents",
+            "name": "Gen Parts",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/hash",
-            "args": ["-l", "DelayBetweenEvents"],
+            "program": "${workspaceFolder}/gen",
+            "args": ["parts", "test", "other", "-s", "07ec8a91"],
             "cwd": "${workspaceFolder}",
             // "environment": [],
             // "MIMode": "lldb"
         },
         {
-            "name": "Hash Delay",
+            "name": "Gen 2",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/hash",
-            "args": ["-l", "Delay"],
+            "program": "${workspaceFolder}/gen",
+            "args": ["2"],
             "cwd": "${workspaceFolder}",
             // "environment": [],
             // "MIMode": "lldb"

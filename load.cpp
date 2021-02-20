@@ -75,17 +75,17 @@ int main(int argc, char* argv[]) {
   }
 
   if (parts && partFiles.size() == 0) {
-    cout << "Must provide at least one part file" << endl;
+    cout << "\033[31mMust provide at least one part file\033[0m" << endl;
     cout << endl << make_man_page(cli, "Load") << endl;
     return 1;
   }
   if (full && fullFiles.size() == 0) {
-    cout << "Must provide at least one full file" << endl;
+    cout << "\033[31mMust provide at least one full file\033[0m" << endl;
     cout << endl << make_man_page(cli, "Load") << endl;
     return 1;
   }
   if (hashes && hashesFiles.size() == 0) {
-    cout << "Must provide at least one hash file" << endl;
+    cout << "\033[31mMust provide at least one hash file\033[0m" << endl;
     cout << endl << make_man_page(cli, "Load") << endl;
     return 1;
   }

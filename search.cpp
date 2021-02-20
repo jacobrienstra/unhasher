@@ -34,7 +34,7 @@ int main(int argc, char** argv)
         value("value")
         .set(input)
         .doc("Value to search for")
-        .if_missing([] { cout << endl << "No valid hash value provided" << endl; }),
+        .if_missing([] { cout << endl << "\033[31mNo valid hash value provided\033[0m" << endl; }),
         (option("-t", "--text")
             .set(textSearch)
             .doc("Search by text value instead of hash") |
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
                 (option("-s", "--substrSearch")
                     .set(searchSubStr)
                     & values(is_hex, "substrHashes", substrHashes)
-                    .if_missing([] { cout << endl << "-s option requires valid hash list" << endl;})
+                    .if_missing([] { cout << endl << "\033[31m-s option requires valid hash list\033[0m" << endl;})
                     )
                 .doc("Return only unhashes which are a substring of any unhash of the following hashes")))
         );
@@ -56,7 +56,7 @@ int main(int argc, char** argv)
         return 1;
     }
     if (!textSearch && !is_hex(input)) {
-        cout << endl << "Hash mode must receive hash as first positional argument" << endl;
+        cout << endl << "\033[31mHash mode must receive hash as first positional argument\033[0m" << endl;
         cout << endl << make_man_page(cli, "Search") << endl;
         return 1;
     }
@@ -64,8 +64,6 @@ int main(int argc, char** argv)
     pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
 
     string searchStr = c.quote(input);
-
-    cout << endl << "SEARCH" << endl;
     if (textSearch) {
         cout << "TEXT mode" << endl;
         cout << "Searching for: " << searchStr << endl;

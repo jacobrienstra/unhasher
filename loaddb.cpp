@@ -60,7 +60,7 @@ void loadDB(int numWords, Corpus& corp, SearchHashes& searchCorp, bool silent)
     searchCorp.insert(UnkHash((uint)row[0].as<int>()));
   }
   if (!silent) cout << searchCorp.size() << " unknown hashes loaded" << endl;
-  cout << "Done loading db" << endl << endl;;
+  cout << "Done loading db" << endl;
   return;
 }
 /* END loadDB */

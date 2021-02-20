@@ -184,8 +184,14 @@ void genCombosRec(
           // context.coutLock->lock();
           // cout << newWord << endl;
           // context.coutLock->unlock();
-
-          threadContext.pThread->insert("INSERT INTO labels_gen" + to_string(context.numWords) + " (text, hash) VALUES (" + threadContext.wThread->quote(newWord) + ", " + to_string((int)newHash) + ") ON CONFLICT DO NOTHING");
+          if (context.insert) {
+            threadContext.pThread->insert("INSERT INTO labels_gen" + to_string(context.numWords) + " (text, hash) VALUES (" + threadContext.wThread->quote(newWord) + ", " + to_string((int)newHash) + ") ON CONFLICT DO NOTHING");
+          }
+          else {
+            context.coutLock->lock();
+            cout << endl << newWord << " : " << newHash << endl;
+            context.coutLock->unlock();
+          }
         }
         catch (std::exception const& e) {
           context.coutLock->lock();
@@ -363,7 +369,7 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
     globalFound += foundCounters[i];
   }
 
-  cout << "Found and inserted " << globalFound << " new combos!" << endl;
+  cout << "Found and " << (context.insert ? "inserted " : "printed ") << globalFound << " new combos!" << endl;
 
   // Return only the strings we used
     // Connection

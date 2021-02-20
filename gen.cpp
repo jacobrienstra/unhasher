@@ -19,17 +19,11 @@
 using namespace clipp;
 using namespace std;
 
-/**
- *
- * Database functions
- *
-**/
-
 auto is_hex = [](const string& arg) {
   return regex_match(arg, regex("(0x)?[a-fA-F0-9]{8}"));
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
   cout << endl << "-----------Fn Start-----------" << endl;
   cout << "GENERATE COMBOS" << endl;
 
@@ -45,29 +39,72 @@ int main(int argc, char* argv[]) {
 
 
   auto searchOrInsert = (
-    required("-s", "--search")
-    .set(search)
-    .doc("Match generated combos against provided hashes")
-    & values(is_hex, "usrHashes")
-    .set(usrHashesVec).if_missing([] { cout << "Must provide list of valid hashes" << endl; }) |
-    required("-i", "--insert")
-    .set(insert)
-    .doc("Insert generated combos into database (tagged as 'DISCOVERED')")
-    .if_conflicted([] { cout << "You can only choose one mode at a time" << endl;})
+    ((required("-i", "--insert")
+      .set(insert)
+      .doc("Insert generated combos into database (tagged as 'DISCOVERED')")
+      .if_conflicted([] { cout << "\033[31mYou can only choose one mode at a time\033[0m" << endl;})) | required("-s", "--search")
+      .set(search)
+      .doc("Match generated combos against provided hashes")
+      & values(is_hex, "usrHashes")
+      .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; }))
     );
 
   auto cli = (
-    required("-2", "--2combos").set(combos2).doc("Generate all 2 word combos") |
-    required("-3", "--3combos").set(combos3).doc("Generate all 3 word combos") |
-    (required("-p", "--newparts").set(parts).doc("Generate possible combos with strings as parts") & values("newParts").set(usrPartsVec)
+    command("parts")
+    .set(parts, true)
+    .doc("Generate possible combos with strings as parts")
+    & (values("newParts").if_missing([] { cout << "\033[31mMust provide list of parts\033[0m" << endl; })
+      .set(usrPartsVec)
       & searchOrInsert) |
-    (required("-f", "--newfull").set(full).doc("Generate all combos with strings as full tags/ids").if_conflicted([] { cout << "You can only choose one type of gen at a time" << endl;}) & values("newFull").set(usrFullVec) & searchOrInsert)
+    command("full")
+    .set(full, true)
+    .doc("Generate all combos with strings as full tags/ids")
+    .if_conflicted([] { cout << "\033[31mYou can only choose one type of gen at a time\033[0m" << endl;})
+    & (values("newFull").if_missing([] { cout << "\033[31mMust provide list of full labels\033[0m" << endl; })
+      .set(usrFullVec) & searchOrInsert
+      ) |
+    command("c2").set(combos2, true).doc("Generate all 2 word combos") |
+    command("c3").set(combos3, true).doc("Generate all 3 word combos")
     );
 
-  parsing_result res = parse(argc, argv, cli);
+  parsing_result result = parse(argc, argv, cli);
 
-  if (res.any_error()) {
-    cout << endl << make_man_page(cli, "Generate Combos") << endl;
+  auto doc_label = [](const parameter& p) {
+    if (!p.flags().empty()) return p.flags().front();
+    if (!p.label().empty()) return p.label();
+    return doc_string{ "<?>" };
+  };
+
+  cout << "args -> parameter mapping:\n";
+  for (const auto& m : result) {
+    cout << "#" << m.index() << " " << m.arg() << " -> ";
+    auto p = m.param();
+    if (p) {
+      cout << doc_label(*p) << " \t";
+      if (m.repeat() > 0) {
+        cout << (m.bad_repeat() ? "[bad repeat " : "[repeat ")
+          << m.repeat() << "]";
+      }
+      if (m.blocked())  cout << " [blocked]";
+      if (m.conflict()) cout << " [conflict]";
+      cout << '\n';
+    }
+    else {
+      cout << " [unmapped]\n";
+    }
+  }
+
+  cout << "missing parameters:\n";
+  for (const auto& m : result.missing()) {
+    auto p = m.param();
+    if (p) {
+      cout << doc_label(*p) << " \t";
+      cout << " [missing after " << m.after_index() << "]\n";
+    }
+  }
+
+  if (result.any_error()) {
+    cout << endl << make_man_page(cli, argv[0]) << endl;
     return 1;
   }
 
@@ -141,7 +178,7 @@ int main(int argc, char* argv[]) {
         if (parts) usedStrs = &used3Strs;
         else usedStrs = &used2Strs;
         if (usedStrs->size() == 0) {
-          cout << "No supplied strings used to generate combos. Nothing to insert" << endl;
+          cout << "\033[31mNo supplied strings used to generate combos. Nothing to insert\033[0m" << endl;
         }
         else {
           string table = parts ? "parts" : "full";
