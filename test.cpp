@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <regex>
 
+#include "types.h"
 #include "clipp.h"
 using namespace clipp;
 using namespace std;

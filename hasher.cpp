@@ -1,9 +1,4 @@
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
-#include <iostream>
 #include <string>
-
 
 #define HASH 5381
 #define M 33

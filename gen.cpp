@@ -13,9 +13,9 @@
 #include <pqxx/pqxx>
 
 #include "clipp.h"
+#include "loaddb.h"
 #include "combos.h"
-#include "hasher.h"
-#include "load.h"
+
 using namespace clipp;
 using namespace std;
 
@@ -31,7 +31,7 @@ auto is_hex = [](const string& arg) {
 
 int main(int argc, char* argv[]) {
   cout << endl << "-----------Fn Start-----------" << endl;
-  cout << "GEN COMBOS" << endl;
+  cout << "GENERATE COMBOS" << endl;
 
   bool combos2 = false;
   bool combos3 = false;
@@ -39,44 +39,45 @@ int main(int argc, char* argv[]) {
   bool full = false;
   bool search = false;
   bool insert = false;
-  std::set<string> usrParts;
-  std::set<string> usrFull;
-  std::set<string> usrHashes;
+  vector<string> usrPartsVec;
+  vector<string> usrFullVec;
+  vector<string> usrHashesVec;
 
-  auto searchOrInsert = (one_of(
-    option("-s", "--search")
+
+  auto searchOrInsert = (
+    required("-s", "--search")
     .set(search)
     .doc("Match generated combos against provided hashes")
     & values(is_hex, "usrHashes")
-    .set(usrHashes).if_missing([] { cout << "Must provide list of valid hashes" << endl; }),
-    option("-i", "--insert")
+    .set(usrHashesVec).if_missing([] { cout << "Must provide list of valid hashes" << endl; }) |
+    required("-i", "--insert")
     .set(insert)
     .doc("Insert generated combos into database (tagged as 'DISCOVERED')")
     .if_conflicted([] { cout << "You can only choose one mode at a time" << endl;})
-  )
     );
 
   auto cli = (
-
-    option("-2", "--2combos").set(combos2).doc("Generate all 2 word combos") |
-    option("-3", "--3combos").set(combos3).doc("Generate all 3 word combos") |
-    (option("-p", "--newparts").set(parts).doc("Generate possible combos with strings as parts") & values("newParts").set(usrParts)
-      & required(searchOrInsert)) |
-    (option("-f", "--newfull").set(full).doc("Generate all combos with strings as full tags/ids").if_conflicted([] { cout << "You can only choose one type of gen at a time" << endl;}) & values("newFull").set(usrFull) & required(searchOrInsert))
+    required("-2", "--2combos").set(combos2).doc("Generate all 2 word combos") |
+    required("-3", "--3combos").set(combos3).doc("Generate all 3 word combos") |
+    (required("-p", "--newparts").set(parts).doc("Generate possible combos with strings as parts") & values("newParts").set(usrPartsVec)
+      & searchOrInsert) |
+    (required("-f", "--newfull").set(full).doc("Generate all combos with strings as full tags/ids").if_conflicted([] { cout << "You can only choose one type of gen at a time" << endl;}) & values("newFull").set(usrFullVec) & searchOrInsert)
     );
 
   parsing_result res = parse(argc, argv, cli);
 
   if (res.any_error()) {
     cout << endl << make_man_page(cli, "Generate Combos") << endl;
+    return 1;
   }
+
+  std::set<string> usrParts(usrPartsVec.begin(), usrPartsVec.end());
+  std::set<string> usrFull(usrFullVec.begin(), usrFullVec.end());
+  std::set<string> usrHashes(usrHashesVec.begin(), usrHashesVec.end());
+
 
   try
   {
-    string wordBuf;
-    double count;
-    uint hash;
-    int loadedParts = 0;
     pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai_test connect_timeout=10" };
     if (combos2)
     {

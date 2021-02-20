@@ -9,17 +9,10 @@
 #include <mutex>
 #include <pqxx/pqxx>
 
-#include "hasher.h"
 #include "combos.h"
 
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/random_access_index.hpp>
-#include <boost/multi_index/member.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/post.hpp>
-
 
 using namespace ::boost;
 using namespace ::boost::multi_index;
@@ -303,7 +296,7 @@ void threadHelper(
 **/
 /*******************************************************/
 // Finds all combos possible with each of the new strings
-set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, Corpus& corp, SearchHashes& searchCorp, bool insert = true)
+set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, Corpus& corp, SearchHashes& searchCorp, bool insert)
 {
   cout << endl << "-----------Fn Start-----------" << endl;
   auto start = chrono::high_resolution_clock::now();

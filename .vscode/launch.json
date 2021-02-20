@@ -6,12 +6,13 @@
 "configurations": 
     [
 
+
         {
-            "name": "Load new parts",
+            "name": "Gen with new parts",
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/load",
-            "args": ["-n", "R4", "R5", "R6", "R7", "R8"],
+            "args": ["-p", "R4", "R5", "R6", "R7", "R8"],
             "cwd": "${workspaceFolder}",
             // "environment": [],
             // "MIMode": "gdb"

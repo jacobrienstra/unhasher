@@ -6,8 +6,7 @@
 #include <pqxx/pqxx>
 
 #include "clipp.h"
-#include "load.h"
-#include "combos.h"
+#include "loaddb.h"
 
 using namespace std;
 using namespace clipp;
@@ -17,6 +16,9 @@ using namespace clipp;
 
 int main(int argc, char** argv)
 {
+    cout << endl << "-----------Fn Start-----------" << endl;
+    cout << "SEARCH" << endl;
+
     bool search3 = false;
     bool searchSubStr = false;
     bool textSearch = false;
@@ -89,7 +91,6 @@ int main(int argc, char** argv)
         searchStr = to_string(iHash);
     }
 
-    // TODO: look for intersections of lists
     int results = 0;
 
 
@@ -201,6 +202,6 @@ int main(int argc, char** argv)
         }
     }
     cout << endl << "Total of " << results << " results found\n";
-
+    cout << "-----------Fn End-----------" << endl;
     return 0;
 }
