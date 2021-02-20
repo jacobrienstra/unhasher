@@ -32,15 +32,15 @@ int main(int argc, char* argv[]) {
 
   auto cli = (
     command("parts").set(parts) &
-    (option("-t").doc("Parts file with tags") & values("partTagFiles").set(partTagFiles).if_missing([] { cout << "Must provide list of files" << endl;}),
-      option("-i").doc("Parts file with IDs") & values("partIdFiles").set(partIdFiles).if_missing([] { cout << "Must provide list of files" << endl;}),
-      option("-v").doc("Part files with values") & values("partValueFiles").set(partValueFiles).if_missing([] { cout << "Must provide list of files" << endl;})
+    (option("-t").doc("Parts file with tags") & values("partTagFiles").set(partTagFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
+      option("-i").doc("Parts file with IDs") & values("partIdFiles").set(partIdFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
+      option("-v").doc("Part files with values") & values("partValueFiles").set(partValueFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; })
       )
     | command("full").set(full) & (
-      option("-t").doc("Full tags files") & values("fullTagFiles").set(fullTagFiles).if_missing([] { cout << "Must provide list of files" << endl;}),
-      option("-i").doc("Full IDs files") & values("fullIdFiles").set(fullIdFiles).if_missing([] { cout << "Must provide list of files" << endl;})
+      option("-t").doc("Full tags files") & values("fullTagFiles").set(fullTagFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
+      option("-i").doc("Full IDs files") & values("fullIdFiles").set(fullIdFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; })
       ) |
-    command("hashes").set(hashes).if_missing([] { cout << "Must provide command" << endl; }).if_conflicted([] { cout << "Can only use one command at a time" << endl; }) & values("hashesFiles").set(hashesFiles).if_missing([] { cout << "Must provide list of files" << endl;})
+    command("hashes").set(hashes).if_missing([] { cout << "\033[31mMust provide command\033[0m" << endl; }).if_conflicted([] { cout << "\033[31mCan only use one command at a time\033[0m" << endl; }) & values("hashesFiles").set(hashesFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;})
     );
 
   parsing_result res = parse(argc, argv, cli);
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
       for (pair<string, string>& file : partFiles) {
         ifstream fparts(file.first);
         if (fparts.fail()) {
-          cout << "Error loading file " << file.first << endl;
+          cout << "\033[31mError loading file " << file.first << "\033[0m" << endl;
           return 1;
         }
         // Main reading loop
@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
       for (pair<string, string>& file : fullFiles) {
         ifstream ffull(file.first);
         if (ffull.fail()) {
-          cout << "Error loading file " << file.first << endl;
+          cout << "\033[31mError loading file " << file.first << "\033[0m" << endl;
           return 1;
         }
         while (ffull.good())
@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
       for (string& file : hashesFiles) {
         ifstream fhashes(file);
         if (fhashes.fail()) {
-          cout << "Error loading file " << file << endl;
+          cout << "\033[31mError loading file " << file << "\033[0m" << endl;
           return 1;
         }
         while (fhashes.good())

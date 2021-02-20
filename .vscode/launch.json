@@ -6,9 +6,18 @@
 "configurations": 
     [
 
-
         {
-            "name": "Gen with new parts",
+            "name": "Load bad",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/load",
+            "args": ["parts", "-t", "file.txt"],
+            "cwd": "${workspaceFolder}",
+            // "environment": [],
+            // "MIMode": "gdb"
+        },
+        {
+            "name": "Load",
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/load",
