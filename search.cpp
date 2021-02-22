@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     cout << endl << "-----------Fn Start-----------" << endl;
     cout << "SEARCH" << endl;
 
-    bool search3 = false;
+    bool search3 = true;
     bool searchSubStr = false;
     bool textSearch = false;
     string input;
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
             .set(textSearch)
             .doc("Search by text value instead of hash") |
             (option("-3", "--search3")
-                .set(search3)
+                .set(search3, false)
                 .doc("Search 3 word table too"),
                 (option("-s", "--substrSearch")
                     .set(searchSubStr)
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
         string retField = textSearch ? "hash" : "text";
         string searchField = textSearch ? "text" : "hash";
         pqxx::work wparts(c);
-        pqxx::result rparts = wparts.exec("SELECT " + retField + " FROM labels_parts WHERE " + searchField + " = " + searchStr);
+        pqxx::result rparts = wparts.exec("SELECT " + retField + ", source FROM labels_parts WHERE " + searchField + " = " + searchStr);
         wparts.commit();
 
         if (rparts.size() != 0) {
@@ -138,7 +138,7 @@ int main(int argc, char** argv)
             for (auto const& row : rparts) {
                 results++;
                 if (textSearch) {
-                    cout << std::hex << row[0].as<int>() << endl;
+                    cout << std::hex << row[0].as<int>() << ": " << row[1] << endl;
                 }
                 else {
                     cout << row[0] << endl;
@@ -182,7 +182,7 @@ int main(int argc, char** argv)
 
         if (search3) {
             pqxx::work wgen3(c);
-            pqxx::result rgen3 = wgen3.exec("SELECT " + retField + " FROM labels_gen3 WHERE " + searchField + " = " + searchStr);
+            pqxx::result rgen3 = wgen3.exec("SELECT " + retField + " FROM labels_gen3 WHERE " + searchField + " = " + searchStr + "ORDER BY text ASC");
             wgen3.commit();
 
             if (rgen3.size() != 0) {

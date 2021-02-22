@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
         while (fhashes.good())
         {
           fhashes >> std::hex >> hash;
-          whashes.exec("INSERT INTO unknown_hashes (hash, unknown) VALUES (" +
+          whashes.exec("INSERT INTO hashes (hash, unknown) VALUES (" +
             to_string((int)hash) +
             ", true) ON CONFLICT (hash) DO NOTHING"
           );

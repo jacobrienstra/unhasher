@@ -69,39 +69,39 @@ int main(int argc, char** argv) {
 
   parsing_result result = parse(argc, argv, cli);
 
-  auto doc_label = [](const parameter& p) {
-    if (!p.flags().empty()) return p.flags().front();
-    if (!p.label().empty()) return p.label();
-    return doc_string{ "<?>" };
-  };
+  // auto doc_label = [](const parameter& p) {
+  //   if (!p.flags().empty()) return p.flags().front();
+  //   if (!p.label().empty()) return p.label();
+  //   return doc_string{ "<?>" };
+  // };
 
-  cout << "args -> parameter mapping:\n";
-  for (const auto& m : result) {
-    cout << "#" << m.index() << " " << m.arg() << " -> ";
-    auto p = m.param();
-    if (p) {
-      cout << doc_label(*p) << " \t";
-      if (m.repeat() > 0) {
-        cout << (m.bad_repeat() ? "[bad repeat " : "[repeat ")
-          << m.repeat() << "]";
-      }
-      if (m.blocked())  cout << " [blocked]";
-      if (m.conflict()) cout << " [conflict]";
-      cout << '\n';
-    }
-    else {
-      cout << " [unmapped]\n";
-    }
-  }
+  // cout << "args -> parameter mapping:\n";
+  // for (const auto& m : result) {
+  //   cout << "#" << m.index() << " " << m.arg() << " -> ";
+  //   auto p = m.param();
+  //   if (p) {
+  //     cout << doc_label(*p) << " \t";
+  //     if (m.repeat() > 0) {
+  //       cout << (m.bad_repeat() ? "[bad repeat " : "[repeat ")
+  //         << m.repeat() << "]";
+  //     }
+  //     if (m.blocked())  cout << " [blocked]";
+  //     if (m.conflict()) cout << " [conflict]";
+  //     cout << '\n';
+  //   }
+  //   else {
+  //     cout << " [unmapped]\n";
+  //   }
+  // }
 
-  cout << "missing parameters:\n";
-  for (const auto& m : result.missing()) {
-    auto p = m.param();
-    if (p) {
-      cout << doc_label(*p) << " \t";
-      cout << " [missing after " << m.after_index() << "]\n";
-    }
-  }
+  // cout << "missing parameters:\n";
+  // for (const auto& m : result.missing()) {
+  //   auto p = m.param();
+  //   if (p) {
+  //     cout << doc_label(*p) << " \t";
+  //     cout << " [missing after " << m.after_index() << "]\n";
+  //   }
+  // }
 
   if (result.any_error()) {
     cout << endl << make_man_page(cli, argv[0]) << endl;
@@ -185,7 +185,8 @@ int main(int argc, char** argv) {
           cout << "Inserting provided " << table << " into db" << endl;
           pqxx::work wNew(c);
           for (auto it = usedStrs->begin(); it != usedStrs->end(); it++) {
-            wNew.exec("INSERT INTO labels_" + table + " (text, hash, source) VALUES (" + c.quote(it->first) + ", " + to_string((int)it->second) + ", '{DISCOVERED}') ON CONFLICT (text) DO UPDATE SET source = labels_" + table + ".source || EXCLUDED.source WHERE NOT labels_" + table + ".source && EXCLUDED.source");
+            wNew.exec("INSERT INTO labels_" + table + " (text, hash, source) VALUES (" + c.quote(it->first) + ", " + to_string((int)it->second) + ", '{DISCOVERED}') ON CONFLICT (text) DO NOTHING");
+            // SET source = labels_" + table + ".source || EXCLUDED.source WHERE NOT labels_" + table + ".source && EXCLUDED.source");
           }
           wNew.commit();
           cout << usedStrs->size() << " " << table << " inserted" << endl;

@@ -316,12 +316,13 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
   Corpus newCorp;
   for (string const& st : newStrs)
   {
-    if (corpWordi.find(st) != corpWordi.end()) {
+    if (insert && corpWordi.find(st) != corpWordi.end()) {
       cout << "'" << st << "' already in db; skipping" << endl;
       continue;
     }
     uint strHash = hasher(st.c_str(), 5381);
     newCorp.push_back(WordPart(st, strHash));
+    corp.push_back(WordPart(st, strHash));
   }
 
   ulong nSize = newCorp.size();

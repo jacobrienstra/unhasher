@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 
     // Check if calculated hash matches unknown hash
     pqxx::work w1(c);
-    pqxx::result r1 = w1.exec("SELECT FROM unknown_hashes WHERE hash = " + to_string((int)hash));
+    pqxx::result r1 = w1.exec("SELECT FROM hashes WHERE hash = " + to_string((int)hash));
     // TODO: might be a known hash code too; check both hash table and parts tables
     w1.commit();
     if (r1.empty()) cout << hashStr << " not found in hash table" << endl;
