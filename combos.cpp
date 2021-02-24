@@ -393,7 +393,7 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
 
 /************************************************/
 /* Generate all possible combos from the corpus */
-void genAllCombos(int numWords, Corpus& corp, SearchHashes& searchCorp)
+void genAllCombos(int numWords, Corpus& corp, SearchHashes& searchCorp, bool insert)
 {
   cout << endl << "-----------Fn Start-----------" << endl;
   auto start = chrono::high_resolution_clock::now();
@@ -410,7 +410,7 @@ void genAllCombos(int numWords, Corpus& corp, SearchHashes& searchCorp)
   ulong foundCounters[cSize];
   for (ulong& counter : foundCounters) counter = 0;
 
-  MainContext context(numWords, cSize, &corp, &searchCorp, globalMax, counters, foundCounters, &coutLock, true);
+  MainContext context(numWords, cSize, &corp, &searchCorp, globalMax, counters, foundCounters, &coutLock, insert);
 
   cout << std::dec << numWords << " WORDS" << endl;
   cout << globalMax << " possible combinations of " << numWords << " parts" << endl;

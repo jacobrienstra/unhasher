@@ -19,6 +19,13 @@
 using namespace clipp;
 using namespace std;
 
+
+// TODO: Create a watch list of unknown but needed hashes
+// TODO: get PrimoCombos list of tags, generate (store ALL?)
+// TODO: apply score to gen tables: based on sources of parts
+// TODO: only one underscore per field
+// Clean up bad ones? Allow only showing certain rank?
+
 auto is_hex = [](const string& arg) {
   return regex_match(arg, regex("(0x)?[a-fA-F0-9]{8}"));
 };
@@ -63,8 +70,14 @@ int main(int argc, char** argv) {
     & (values("newFull").if_missing([] { cout << "\033[31mMust provide list of full labels\033[0m" << endl; })
       .set(usrFullVec) & searchOrInsert
       ) |
-    command("c2").set(combos2, true).doc("Generate all 2 word combos") |
-    command("c3").set(combos3, true).doc("Generate all 3 word combos")
+    command("c2").set(combos2, true).doc("Generate all 2 word combos") & option("-s", "--search")
+    .set(search)
+    .doc("Match generated combos against provided hashes") & values(is_hex, "usrHashes")
+    .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; }) |
+    command("c3").set(combos3, true).doc("Generate all 3 word combos") & option("-s", "--search")
+    .set(search)
+    .doc("Match generated combos against provided hashes") & values(is_hex, "usrHashes")
+    .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; })
     );
 
   parsing_result result = parse(argc, argv, cli);
@@ -116,19 +129,24 @@ int main(int argc, char** argv) {
   try
   {
     pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
-    if (combos2)
+    if (combos2 || combos3)
     {
-      Corpus corp;
       SearchHashes searchCorp;
-      loadDB(2, corp, searchCorp);
-      genAllCombos(2, corp, searchCorp);
-    }
-    else if (combos3)
-    {
+      SearchHashes specCorp;
+      SearchHashes* toSearch;
+      if (search) {
+        for (string const& hash : usrHashes) {
+          uint uiHash = ((uint)strtol(hash.c_str(), NULL, 16));
+          specCorp.insert(UnkHash(uiHash));
+        }
+        toSearch = &specCorp;
+      }
+      else {
+        toSearch = &searchCorp;
+      }
       Corpus corp;
-      SearchHashes searchCorp;
-      loadDB(3, corp, searchCorp);
-      genAllCombos(3, corp, searchCorp);
+      loadDB(combos2 ? 2 : 3, corp, searchCorp);
+      genAllCombos(combos2 ? 2 : 3, corp, *toSearch, !search);
     }
     else if (parts || full)
     {
@@ -185,8 +203,7 @@ int main(int argc, char** argv) {
           cout << "Inserting provided " << table << " into db" << endl;
           pqxx::work wNew(c);
           for (auto it = usedStrs->begin(); it != usedStrs->end(); it++) {
-            wNew.exec("INSERT INTO labels_" + table + " (text, hash, source) VALUES (" + c.quote(it->first) + ", " + to_string((int)it->second) + ", '{DISCOVERED}') ON CONFLICT (text) DO NOTHING");
-            // SET source = labels_" + table + ".source || EXCLUDED.source WHERE NOT labels_" + table + ".source && EXCLUDED.source");
+            wNew.exec("INSERT INTO labels_" + table + " (text, hash, source) VALUES (" + c.quote(it->first) + ", " + to_string((int)it->second) + ", '{DISCOVERED}') ON CONFLICT (text) DO UPDATE SET source = labels_" + table + ".source || EXCLUDED.source WHERE NOT labels_" + table + ".source && EXCLUDED.source");
           }
           wNew.commit();
           cout << usedStrs->size() << " " << table << " inserted" << endl;

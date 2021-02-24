@@ -12,7 +12,8 @@ using namespace std;
 using namespace clipp;
 
 
-// default dictionary
+//TODO: allow for searching multiple strings or hashes
+
 
 int main(int argc, char** argv)
 {
