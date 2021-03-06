@@ -24,6 +24,7 @@ using namespace std;
 // TODO: get PrimoCombos list of tags, generate (store ALL?)
 // TODO: apply score to gen tables: based on sources of parts
 // TODO: only one underscore per field
+// TODO: add 0, 1 and _0, _1 at end only
 // Clean up bad ones? Allow only showing certain rank?
 
 auto is_hex = [](const string& arg) {
@@ -70,14 +71,20 @@ int main(int argc, char** argv) {
     & (values("newFull").if_missing([] { cout << "\033[31mMust provide list of full labels\033[0m" << endl; })
       .set(usrFullVec) & searchOrInsert
       ) |
-    command("c2").set(combos2, true).doc("Generate all 2 word combos") & option("-s", "--search")
-    .set(search)
-    .doc("Match generated combos against provided hashes") & values(is_hex, "usrHashes")
-    .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; }) |
-    command("c3").set(combos3, true).doc("Generate all 3 word combos") & option("-s", "--search")
-    .set(search)
-    .doc("Match generated combos against provided hashes") & values(is_hex, "usrHashes")
-    .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; })
+    command("c2").set(combos2, true).doc("Generate all 2 word combos") & (option("-s", "--search")
+      .set(search)
+      .doc("Match generated combos against provided hashes") & values(is_hex, "usrHashes")
+      .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; }), option("-i", "--insert")
+      .set(insert)
+      .doc("Insert generated combos into database (tagged as 'DISCOVERED')")
+      .if_conflicted([] { cout << "\033[31mYou can only choose one mode at a time\033[0m" << endl;})) |
+    command("c3").set(combos3, true).doc("Generate all 3 word combos") & (option("-s", "--search")
+      .set(search)
+      .doc("Match generated combos against provided hashes") & values(is_hex, "usrHashes")
+      .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; }), option("-i", "--insert")
+      .set(insert)
+      .doc("Insert generated combos into database (tagged as 'DISCOVERED')")
+      .if_conflicted([] { cout << "\033[31mYou can only choose one mode at a time\033[0m" << endl;}))
     );
 
   parsing_result result = parse(argc, argv, cli);
@@ -146,7 +153,15 @@ int main(int argc, char** argv) {
       }
       Corpus corp;
       loadDB(combos2 ? 2 : 3, corp, searchCorp);
-      genAllCombos(combos2 ? 2 : 3, corp, *toSearch, !search);
+      genAllCombos(combos2 ? 2 : 3, corp, *toSearch, insert);
+      if (insert) {
+        pqxx::work wHashes(c);
+        for (auto it = specCorp.get<Hash>().begin(); it != specCorp.get<Hash>().end(); it++) {
+          wHashes.exec("INSERT INTO hashes (hash, unknown) VALUES (" + to_string(it->hash) + ", true) ON CONFLICT (hash) DO NOTHING");
+        }
+        wHashes.commit();
+        cout << specCorp.size() << " hashes inserted" << endl;
+      }
     }
     else if (parts || full)
     {

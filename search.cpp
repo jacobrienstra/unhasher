@@ -131,7 +131,7 @@ int main(int argc, char** argv)
         string retField = textSearch ? "hash" : "text";
         string searchField = textSearch ? "text" : "hash";
         pqxx::work wparts(c);
-        pqxx::result rparts = wparts.exec("SELECT " + retField + ", source FROM labels_parts WHERE " + searchField + " = " + searchStr);
+        pqxx::result rparts = wparts.exec("SELECT " + retField + ", source FROM labels_parts WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC");
         wparts.commit();
 
         if (rparts.size() != 0) {
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
         }
 
         pqxx::work wfull(c);
-        pqxx::result rfull = wfull.exec("SELECT " + retField + " FROM labels_full WHERE " + searchField + " = " + searchStr);
+        pqxx::result rfull = wfull.exec("SELECT " + retField + " FROM labels_full WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC");
         wfull.commit();
 
         if (rfull.size() != 0) {
@@ -165,7 +165,7 @@ int main(int argc, char** argv)
         }
 
         pqxx::work wgen2(c);
-        pqxx::result rgen2 = wgen2.exec("SELECT " + retField + " FROM labels_gen2 WHERE " + searchField + " = " + searchStr);
+        pqxx::result rgen2 = wgen2.exec("SELECT " + retField + " FROM labels_gen2 WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC");
         wgen2.commit();
 
         if (rgen2.size() != 0) {
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
 
         if (search3) {
             pqxx::work wgen3(c);
-            pqxx::result rgen3 = wgen3.exec("SELECT " + retField + " FROM labels_gen3 WHERE " + searchField + " = " + searchStr + "ORDER BY text ASC");
+            pqxx::result rgen3 = wgen3.exec("SELECT " + retField + " FROM labels_gen3 WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC, text ASC");
             wgen3.commit();
 
             if (rgen3.size() != 0) {
@@ -200,7 +200,7 @@ int main(int argc, char** argv)
             }
         }
     }
-    cout << endl << "Total of " << results << " results found\n";
+    cout << endl << "Total of " << std::dec << results << " results found\n";
     cout << "-----------Fn End-----------" << endl;
     return 0;
 }

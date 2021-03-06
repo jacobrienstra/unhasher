@@ -29,13 +29,13 @@ void loadDB(int numWords, Corpus& corp, SearchHashes& searchCorp, bool silent)
   pqxx::work w(c);
   pqxx::result r;
   string condition = numWords == 3 ? "WHERE NOT source = '{VALUE}'" : "";
-  string query = "SELECT text, hash FROM labels_parts " + condition + " ORDER BY count DESC, source ASC";
+  string query = "SELECT text, hash, quality FROM labels_parts " + condition + " ORDER BY count DESC, source ASC";
   r = w.exec(query);
   w.commit();
 
   if (!silent) cout << "Loading " << r.size() << " parts into corpus..." << endl;
   for (pqxx::row const& row : r) {
-    corp.get<Word>().insert(WordPart(row[0].c_str(), (uint)row[1].as<int>()));
+    corp.get<Word>().insert(WordPart(row[0].c_str(), (uint)row[1].as<int>(), row[2].as<int>()));
   }
   if (!silent) cout << "Corpus is " << corp.size() << " large" << endl;
 
@@ -43,11 +43,11 @@ void loadDB(int numWords, Corpus& corp, SearchHashes& searchCorp, bool silent)
   {
     if (!silent) cout << "Fetching full..." << endl;
     pqxx::work w2(c);
-    pqxx::result r2 = w2.exec("SELECT text, hash FROM labels_full ORDER BY source ASC");
+    pqxx::result r2 = w2.exec("SELECT text, hash, quality FROM labels_full ORDER BY source ASC");
     w2.commit();
     if (!silent) cout << "Loading " << r2.size() << " full into corpus..." << endl;
     for (auto const& row : r2) {
-      corp.get<Word>().insert(WordPart(row[0].c_str(), (uint)row[1].as<int>()));
+      corp.get<Word>().insert(WordPart(row[0].c_str(), (uint)row[1].as<int>(), row[2].as<int>()));
     }
     if (!silent) cout << "Corpus is " << corp.size() << " large" << endl;
   }

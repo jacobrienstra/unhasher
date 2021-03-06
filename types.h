@@ -24,14 +24,17 @@ using namespace ::boost::multi_index;
 typedef struct WordPart {
   string word;
   uint hash;
+  int qual;
 
   WordPart() {
     word = "";
     hash = 0;
+    qual = 0;
   }
-  WordPart(string iWord, uint iHash) {
+  WordPart(string iWord, uint iHash, int iQual) {
     hash = iHash;
     word = iWord;
+    qual = iQual;
   }
 
   ~WordPart() {}

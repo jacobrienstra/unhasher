@@ -155,7 +155,7 @@ void printPerc(ulong* counters, ulong maxCombos, ulong size)
 // Recursive comboGenerator
 void genCombosRec(
   MainContext& context, ThreadContext& threadContext,
-  int depth, uint curHash, string curString
+  int depth, uint curHash, string curString, int curQual, bool used_
 )
 {
   if (depth == 0) return;
@@ -173,6 +173,7 @@ void genCombosRec(
     string w = it->word;
     uint newHash = w.empty() ? it->hash : hasher(w.c_str(), curHash);
     string newWord = curString + w;
+    int newQual = curQual + it->qual;
 
     // Can only be a new combo if last level
     if (depth == 1) {
@@ -185,7 +186,7 @@ void genCombosRec(
           // cout << newWord << endl;
           // context.coutLock->unlock();
           if (context.insert) {
-            threadContext.pThread->insert("INSERT INTO labels_gen" + to_string(context.numWords) + " (text, hash) VALUES (" + threadContext.wThread->quote(newWord) + ", " + to_string((int)newHash) + ") ON CONFLICT DO NOTHING");
+            threadContext.pThread->insert("INSERT INTO labels_gen" + to_string(context.numWords) + " (text, hash, quality) VALUES (" + threadContext.wThread->quote(newWord) + ", " + to_string((int)newHash) + ", " + to_string(newQual) + ") ON CONFLICT (text) DO NOTHING");
           }
           else {
             context.coutLock->lock();
@@ -210,13 +211,13 @@ void genCombosRec(
     }
     // Next level downward
     genCombosRec(context, threadContext,
-      depth - 1, newHash, newWord);
+      depth - 1, newHash, newWord, newQual, used_);
 
     // Underscore before only the last word
-    if (depth == 2) {
+    if (!used_) {
       uint newerHash = hasher("_", newHash);
       genCombosRec(context, threadContext,
-        depth - 1, newerHash, newWord + "_");
+        depth - 1, newerHash, newWord + "_", newQual, true);
     }
   }
 }
@@ -250,23 +251,26 @@ void threadHelper(
   // Normal, all combos
   if (!context.useNewCorp) {
     WordPart threadEl = context.corp->at(elIndex);
+    bool used_ = false;
+    if (threadEl.word.find('_') != string::npos) {
+      used_ = true;
+    }
     genCombosRec(
       context, threadContext,
-      context.numWords - 1, threadEl.hash, threadEl.word
+      context.numWords - 1, threadEl.hash, threadEl.word, threadEl.qual, used_
     );
-    if (context.numWords == 2)
+    if (!used_)
     {
       uint newerHash = hasher("_", threadEl.hash);
       genCombosRec(
         context, threadContext,
-        context.numWords - 1, newerHash, threadEl.word + "_"
-      );
+        context.numWords - 1, newerHash, threadEl.word + "_", threadEl.qual, true);
     }
   }
   else {
     genCombosRec(
       context, threadContext,
-      context.numWords, 5381, ""
+      context.numWords, 5381, "", 0, false
     );
   }
 
@@ -321,8 +325,8 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
       continue;
     }
     uint strHash = hasher(st.c_str(), 5381);
-    newCorp.push_back(WordPart(st, strHash));
-    corp.push_back(WordPart(st, strHash));
+    newCorp.push_back(WordPart(st, strHash, 0));
+    corp.push_back(WordPart(st, strHash, 0));
   }
 
   ulong nSize = newCorp.size();
