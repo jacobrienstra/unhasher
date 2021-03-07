@@ -34,6 +34,7 @@ public:
   ulong globalMax;
   ulong* counters;
   ulong* foundCounters;
+  ulong* confirmedCounters;
 
   bool useNewCorp;
   Corpus* newCorp;
@@ -45,7 +46,7 @@ public:
   MainContext(int pnumWords, ulong pnumThreads,
     Corpus* pcorp, SearchHashes* psearchCorp,
     ulong pglobalMax,
-    ulong* pcounters, ulong* pfoundCounters, mutex* pcoutLock, bool pinsert)
+    ulong* pcounters, ulong* pfoundCounters, ulong* pconfirmedCounters, mutex* pcoutLock, bool pinsert)
   {
     numWords = pnumWords;
     numThreads = pnumThreads;
@@ -57,6 +58,7 @@ public:
     globalMax = pglobalMax;
     counters = pcounters;
     foundCounters = pfoundCounters;
+    confirmedCounters = pconfirmedCounters;
 
     useNewCorp = false;
     coutLock = pcoutLock;
@@ -213,8 +215,8 @@ void genCombosRec(
     genCombosRec(context, threadContext,
       depth - 1, newHash, newWord, newQual, used_);
 
-    // Underscore before only the last word
-    if (!used_) {
+    // Underscore if not used before
+    if (!used_ && depth != 1) {
       uint newerHash = hasher("_", newHash);
       genCombosRec(context, threadContext,
         depth - 1, newerHash, newWord + "_", newQual, true);
@@ -232,7 +234,7 @@ void threadHelper(
   MainContext& context) {
 
   // Stats
-  ulong threadMax = pow(context.cSize, context.numWords - 1) * 2;
+  ulong threadMax = pow(context.cSize, context.numWords - 1) * context.numWords;
   // set initial position, hence numWords - 1 positions to test
 
  // Connection
@@ -251,21 +253,19 @@ void threadHelper(
   // Normal, all combos
   if (!context.useNewCorp) {
     WordPart threadEl = context.corp->at(elIndex);
-    bool used_ = false;
-    if (threadEl.word.find('_') != string::npos) {
-      used_ = true;
-    }
+    // bool used_ = false;
+    // if (threadEl.word.find('_') != string::npos) {
+    //   used_ = true;
+    // }
     genCombosRec(
       context, threadContext,
-      context.numWords - 1, threadEl.hash, threadEl.word, threadEl.qual, used_
+      context.numWords - 1, threadEl.hash, threadEl.word, threadEl.qual, false
     );
-    if (!used_)
-    {
-      uint newerHash = hasher("_", threadEl.hash);
-      genCombosRec(
-        context, threadContext,
-        context.numWords - 1, newerHash, threadEl.word + "_", threadEl.qual, true);
-    }
+    uint newerHash = hasher("_", threadEl.hash);
+    genCombosRec(
+      context, threadContext,
+      context.numWords - 1, newerHash, threadEl.word + "_", threadEl.qual, true);
+
   }
   else {
     genCombosRec(
@@ -276,10 +276,11 @@ void threadHelper(
 
   try {
     pThread.complete();
-    ulong checked = 0;
     while (!pThread.empty()) {
-      pThread.retrieve();
-      checked++;
+      pair<int, pqxx::result> res = pThread.retrieve();
+      if (!res.second.empty()) {
+        (*(context.confirmedCounters + tIndex))++;
+      }
     }
     wThread.commit();
     // context.coutLock->lock();
@@ -331,7 +332,7 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
 
   ulong nSize = newCorp.size();
   ulong cSize = corp.size();
-  ulong globalMax = pow(cSize, (numWords - 1)) * numWords * nSize * 2;
+  ulong globalMax = pow(cSize, (numWords - 1)) * numWords * nSize * numWords;
 
   // Counter array
   // Each level is a part at a depth
@@ -340,8 +341,10 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
   for (ulong& counter : counters) counter = 0;
   ulong foundCounters[numThreads];
   for (ulong& counter : foundCounters) counter = 0;
+  ulong confirmedCounters[numThreads];
+  for (ulong& counter : confirmedCounters) counter = 0;
 
-  MainContext context(numWords, numThreads, &corp, &searchCorp, globalMax, counters, foundCounters, &coutLock, insert);
+  MainContext context(numWords, numThreads, &corp, &searchCorp, globalMax, counters, foundCounters, confirmedCounters, &coutLock, insert);
   context.setNewCorp(&newCorp);
 
   cout << globalMax << " possible combos of " << iterStr(newCorp) << " amid " << numWords - 1 << " other part(s)" << endl;
@@ -376,6 +379,13 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
 
   cout << "Found and " << (context.insert ? "inserted " : "printed ") << globalFound << " new combos!" << endl;
 
+  ulong globalConfirmed = 0;
+  for (ulong i = 0; i < numThreads; i++) {
+    globalConfirmed += confirmedCounters[i];
+  }
+
+  cout << "Confirmed " << globalConfirmed << " inserts" << endl;
+
   // Return only the strings we used
     // Connection
   pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
@@ -406,15 +416,17 @@ void genAllCombos(int numWords, Corpus& corp, SearchHashes& searchCorp, bool ins
   mutex coutLock;
 
   ulong cSize = corp.size();
-  ulong globalMax = pow(cSize, numWords) * 2;
+  ulong globalMax = pow(cSize, numWords) * (numWords); // underscore positions + no underscore = numWords
 
   // Counter array
   ulong counters[cSize];
   for (ulong& counter : counters) counter = 0;
   ulong foundCounters[cSize];
   for (ulong& counter : foundCounters) counter = 0;
+  ulong confirmedCounters[cSize];
+  for (ulong& counter : confirmedCounters) counter = 0;
 
-  MainContext context(numWords, cSize, &corp, &searchCorp, globalMax, counters, foundCounters, &coutLock, insert);
+  MainContext context(numWords, cSize, &corp, &searchCorp, globalMax, counters, foundCounters, confirmedCounters, &coutLock, insert);
 
   cout << std::dec << numWords << " WORDS" << endl;
   cout << globalMax << " possible combinations of " << numWords << " parts" << endl;
@@ -439,6 +451,13 @@ void genAllCombos(int numWords, Corpus& corp, SearchHashes& searchCorp, bool ins
   }
 
   cout << globalFound << " matches for unknown hashes found!" << endl;
+
+  ulong globalConfirmed = 0;
+  for (ulong i = 0; i < cSize; i++) {
+    globalConfirmed += confirmedCounters[i];
+  }
+
+  cout << "Confirmed " << globalConfirmed << " inserts" << endl;
 
   cout << endl << "Combo generation done!" << endl;
   cout << "-----------Fn End-----------" << endl;

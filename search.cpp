@@ -165,7 +165,7 @@ int main(int argc, char** argv)
         }
 
         pqxx::work wgen2(c);
-        pqxx::result rgen2 = wgen2.exec("SELECT " + retField + " FROM labels_gen2 WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC");
+        pqxx::result rgen2 = wgen2.exec("SELECT " + retField + " FROM labels_gen2 WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC, text ASC");
         wgen2.commit();
 
         if (rgen2.size() != 0) {

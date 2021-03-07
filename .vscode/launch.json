@@ -6,6 +6,7 @@
 "configurations": 
     [
 
+
         {
             "name": "Load bad",
             "type": "lldb",
@@ -41,7 +42,7 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/gen",
-            "args": ["2"],
+            "args": ["c2", "-i"],
             "cwd": "${workspaceFolder}",
             // "environment": [],
             // "MIMode": "lldb"
