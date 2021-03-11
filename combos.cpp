@@ -188,7 +188,7 @@ void genCombosRec(
           // cout << newWord << endl;
           // context.coutLock->unlock();
           if (context.insert) {
-            threadContext.pThread->insert("INSERT INTO labels_gen" + to_string(context.numWords) + " (text, hash, quality) VALUES (" + threadContext.wThread->quote(newWord) + ", " + to_string((int)newHash) + ", " + to_string(newQual) + ") ON CONFLICT (text) DO NOTHING");
+            threadContext.pThread->insert("INSERT INTO labels_gen" + to_string(context.numWords) + " (text, hash, quality) VALUES (" + threadContext.wThread->quote(newWord) + ", " + to_string((int)newHash) + ", " + to_string(newQual) + ") ON CONFLICT (text) DO NOTHING RETURNING text");
           }
           else {
             context.coutLock->lock();

@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
       Corpus corp;
       loadDB(combos2 ? 2 : 3, corp, searchCorp);
       genAllCombos(combos2 ? 2 : 3, corp, *toSearch, insert);
-      if (insert) {
+      if (insert && search) {
         pqxx::work wHashes(c);
         for (auto it = specCorp.get<Hash>().begin(); it != specCorp.get<Hash>().end(); it++) {
           wHashes.exec("INSERT INTO hashes (hash, unknown) VALUES (" + to_string(it->hash) + ", true) ON CONFLICT (hash) DO NOTHING");
