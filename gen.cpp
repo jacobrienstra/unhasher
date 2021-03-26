@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
           cout << "Inserting provided " << table << " into db" << endl;
           pqxx::work wNew(c);
           for (auto it = usedStrs->begin(); it != usedStrs->end(); it++) {
-            wNew.exec("INSERT INTO labels_" + table + " (text, hash, source) VALUES (" + c.quote(it->first) + ", " + to_string((int)it->second) + ", '{DISCOVERED}') ON CONFLICT (text) DO UPDATE SET source = labels_" + table + ".source || EXCLUDED.source WHERE NOT labels_" + table + ".source && EXCLUDED.source");
+            wNew.exec("INSERT INTO labels_" + table + " (text, hash, source" + (!parts ? ", quality" : "") + ") VALUES (" + c.quote(it->first) + ", " + to_string((int)it->second) + ", '{DISCOVERED}'" + (!parts ? ", 0" : "") + ") ON CONFLICT (text) DO UPDATE SET source = labels_" + table + ".source || EXCLUDED.source WHERE NOT labels_" + table + ".source && EXCLUDED.source");
           }
           wNew.commit();
           cout << usedStrs->size() << " " << table << " inserted" << endl;
