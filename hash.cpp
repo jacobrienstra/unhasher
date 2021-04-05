@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
     sprintf(buf, "%08x", hash);
     string hashStr = buf;
 
-    cout << endl << hashStr << endl << endl;
+    cout << endl << hashStr << " " << (int)hash << endl << endl;
 
     pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
 

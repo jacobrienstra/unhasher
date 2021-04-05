@@ -217,9 +217,12 @@ void genCombosRec(
 
     // Underscore if not used before
     if (!used_ && depth != 1) {
-      uint newerHash = hasher("_", newHash);
+      uint _Hash = hasher("_", newHash);
       genCombosRec(context, threadContext,
-        depth - 1, newerHash, newWord + "_", newQual, true);
+        depth - 1, _Hash, newWord + "_", newQual, true);
+      uint spHash = hasher(" ", newHash);
+      genCombosRec(context, threadContext,
+        depth - 1, spHash, newWord + " ", newQual, true);
     }
   }
 }
@@ -261,10 +264,14 @@ void threadHelper(
       context, threadContext,
       context.numWords - 1, threadEl.hash, threadEl.word, threadEl.qual, false
     );
-    uint newerHash = hasher("_", threadEl.hash);
+    uint _Hash = hasher("_", threadEl.hash);
     genCombosRec(
       context, threadContext,
-      context.numWords - 1, newerHash, threadEl.word + "_", threadEl.qual, true);
+      context.numWords - 1, _Hash, threadEl.word + "_", threadEl.qual, true);
+    uint spHash = hasher(" ", threadEl.hash);
+    genCombosRec(
+      context, threadContext,
+      context.numWords - 1, spHash, threadEl.word + " ", threadEl.qual, true);
 
   }
   else {

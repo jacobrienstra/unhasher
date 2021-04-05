@@ -29,12 +29,14 @@ int main(int argc, char* argv[]) {
   vector<string> fullTagFiles;
   vector<string> fullIdFiles;
   vector<string> hashesFiles;
+  vector<string> partDiscFiles;
 
   auto cli = (
     command("parts").set(parts) &
     (option("-t").doc("Parts file with tags") & values("partTagFiles").set(partTagFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
       option("-i").doc("Parts file with IDs") & values("partIdFiles").set(partIdFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
-      option("-v").doc("Part files with values") & values("partValueFiles").set(partValueFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; })
+      option("-v").doc("Part files with values") & values("partValueFiles").set(partValueFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
+      option("-d").doc("Part files with discovered values") & values("partDiscFiles").set(partDiscFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; })
       )
     | command("full").set(full) & (
       option("-t").doc("Full tags files") & values("fullTagFiles").set(fullTagFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
@@ -64,6 +66,10 @@ int main(int argc, char* argv[]) {
   for (string const& file : partValueFiles) {
     cout << "Part file '" + file + "': VALUEs" << endl;
     partFiles.emplace_back(pair(file, "VALUE"));
+  }
+  for (string const& file : partDiscFiles) {
+    cout << "Part file '" + file + "': DISCOVEREDs" << endl;
+    partFiles.emplace_back(pair(file, "DISCOVERED"));
   }
   for (string const& file : fullTagFiles) {
     cout << "Full file '" + file + "': TAGs" << endl;

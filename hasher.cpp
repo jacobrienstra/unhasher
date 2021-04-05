@@ -1,6 +1,6 @@
 #include <string>
+#include "hasher.h"
 
-#define HASH 5381
 #define M 33
 
 unsigned int hasher(const char* str, unsigned int hashStart)

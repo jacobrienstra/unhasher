@@ -8,6 +8,7 @@
 
 
 
+
         {
             "name": "Load bad",
             "type": "lldb",
@@ -39,11 +40,11 @@
             // "MIMode": "lldb"
         },
         {
-            "name": "Gen Supression",
+            "name": "Select",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/gen",
-            "args": ["parts", "Supression", "-i"],
+            "program": "${workspaceFolder}/select",
+            "args": ["In", "Region1", "0xb72d045a"],
             "cwd": "${workspaceFolder}",
             // "environment": [],
             // "MIMode": "lldb"
