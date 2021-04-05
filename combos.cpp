@@ -307,7 +307,7 @@ void threadHelper(
 **/
 /*******************************************************/
 // Finds all combos possible with each of the new strings
-set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, Corpus& corp, SearchHashes& searchCorp, bool insert)
+set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, Corpus& corp, SearchHashes& searchCorp, bool insert, int quality)
 {
   cout << endl << "-----------Fn Start-----------" << endl;
   auto start = chrono::high_resolution_clock::now();
@@ -326,8 +326,8 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
       continue;
     }
     uint strHash = hasher(st.c_str(), 5381);
-    newCorp.push_back(WordPart(st, strHash, 0));
-    corp.push_back(WordPart(st, strHash, 0));
+    newCorp.push_back(WordPart(st, strHash, quality));
+    corp.push_back(WordPart(st, strHash, quality));
   }
 
   ulong nSize = newCorp.size();
