@@ -339,7 +339,7 @@ set<pair<string, uint> > findNewPartCombos(set<string>& newStrs, int numWords, C
 
   ulong nSize = newCorp.size();
   ulong cSize = corp.size();
-  ulong globalMax = pow(cSize, (numWords - 1)) * numWords * nSize * numWords;
+  ulong globalMax = pow(cSize, (numWords - 1)) * numWords * nSize * ((2 * numWords) - 1);
 
   // Counter array
   // Each level is a part at a depth
@@ -423,7 +423,7 @@ void genAllCombos(int numWords, Corpus& corp, SearchHashes& searchCorp, bool ins
   mutex coutLock;
 
   ulong cSize = corp.size();
-  ulong globalMax = pow(cSize, numWords) * (numWords); // underscore positions + no underscore = numWords
+  ulong globalMax = pow(cSize, numWords) * ((2 * numWords) - 1); // underscore positions + space positions + neither = numWords
 
   // Counter array
   ulong counters[cSize];
