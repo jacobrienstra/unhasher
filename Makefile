@@ -12,7 +12,7 @@ GEN = gen
 HASH = hash
 SEARCH = search
 TEST = test
-SELECT = select
+UTIL = UTIL
 
 
 # space-separated list of header files
@@ -20,7 +20,7 @@ GENHRDS =  types.h loaddb.h combos.h
 HASHHDRS = types.h hasher.h
 SEARCHHDRS = types.h loaddb.h
 TESTHDRS = types.h
-SELECTHDRS = types.h hasher.h
+UTILHDRS = types.h hasher.h
 
 # space-separated list of source files
 LOADSRCS = load.cpp
@@ -28,7 +28,7 @@ GENSRCS = gen.cpp loaddb.cpp combos.cpp hasher.cpp
 HASHSRCS = hash.cpp hasher.cpp
 SEARCHSRCS = search.cpp loaddb.cpp
 TESTSRCS = test.cpp
-SELECTSRCS = select.cpp hasher.cpp
+UTILSRCS = util.cpp hasher.cpp
 
 # automatically generated list of object files
 LOADOBJS = $(LOADSRCS:.cpp=.o)
@@ -36,10 +36,10 @@ GENOBJS = $(GENSRCS:.cpp=.o)
 HASHOBJS = $(HASHSRCS:.cpp=.o)
 SEARCHOBJS = $(SEARCHSRCS:.cpp=.o)
 TESTOBJS = $(TESTSRCS:.cpp=.o)
-SELECTOBJS = $(SELECTSRCS:.cpp=.o)
+UTILOBJS = $(UTILSRCS:.cpp=.o)
 
 
-all: $(LOAD) $(GEN) $(HASH) $(SEARCH) $(TEST) $(SELECT)
+all: $(LOAD) $(GEN) $(HASH) $(SEARCH) $(TEST) $(UTIL)
 
 # default target
 $(LOAD): $(LOADOBJS) Makefile
@@ -57,15 +57,15 @@ $(SEARCH): $(SEARCHOBJS) $(SEARCHHDRS) Makefile
 $(TEST): $(TESTOBJS) $(TESTHDRS) Makefile
 	$(CC) $(CPPFLAGS) -o $@ $(TESTOBJS) $(LIBS)
 
-$(SELECT): $(SELECTOBJS) $(SELECTHDRS) Makefile
-	$(CC) $(CPPFLAGS) -o $@ $(SELECTOBJS) $(LIBS)
+$(UTIL): $(UTILOBJS) $(UTILHDRS) Makefile
+	$(CC) $(CPPFLAGS) -o $@ $(UTILOBJS) $(LIBS)
 
 # dependencies
 $(GENOBJS): $(GENHRDS) Makefile
 $(HASHOBJS): $(HASHHRDS) Makefile
 $(SEARCHOBJS): $(SEARCHHDRS) Makefile
 $(TESTOBJS): $(TESTHDRS) Makefile
-$(SELECTOBJS): $(SELECTHDRS) Makefile
+$(UTILOBJS): $(UTILHDRS) Makefile
 
 
 # housekeeping

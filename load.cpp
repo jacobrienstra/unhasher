@@ -32,17 +32,22 @@ int main(int argc, char* argv[]) {
   vector<string> partDiscFiles;
 
   auto cli = (
-    command("parts").set(parts) &
-    (option("-t").doc("Parts file with tags") & values("partTagFiles").set(partTagFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
-      option("-i").doc("Parts file with IDs") & values("partIdFiles").set(partIdFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
-      option("-v").doc("Part files with values") & values("partValueFiles").set(partValueFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
-      option("-d").doc("Part files with discovered values") & values("partDiscFiles").set(partDiscFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; })
+    (
+      command("parts").set(parts) &
+      (option("-t") & values("partTagFiles", partTagFiles) % "Parts file with tags",
+        option("-i") & values("partIdFiles", partIdFiles) % "Parts file with IDs",
+        option("-v") & values("partValueFiles", partValueFiles) % "Part files with values",
+        option("-d") & values("partDiscFiles", partDiscFiles) % "Part files with discovered values"
+        )
       )
-    | command("full").set(full) & (
-      option("-t").doc("Full tags files") & values("fullTagFiles").set(fullTagFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; }),
-      option("-i").doc("Full IDs files") & values("fullIdFiles").set(fullIdFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;}).if_blocked([] { cout << "\033[31mNo source flag provided\033[0m" << endl; })
-      ) |
-    command("hashes").set(hashes).if_missing([] { cout << "\033[31mMust provide command\033[0m" << endl; }).if_conflicted([] { cout << "\033[31mCan only use one command at a time\033[0m" << endl; }) & values("hashesFiles").set(hashesFiles).if_missing([] { cout << "\033[31mMust provide list of files\033[0m" << endl;})
+    | (
+      command("full").set(full) &
+      (
+        option("-t") & values("fullTagFiles", fullTagFiles) % "Full tags files",
+        option("-i") & values("fullIdFiles", fullIdFiles) % "Full IDs files"
+        )
+      )
+    | command("hashes").set(hashes) & values("hashesFiles", hashesFiles)
     );
 
   parsing_result res = parse(argc, argv, cli);

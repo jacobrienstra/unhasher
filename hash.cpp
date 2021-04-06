@@ -21,8 +21,8 @@ int main(int argc, char* argv[])
     string input;
 
     group cli = (
-        value("text").set(input).doc("Text value to hash"),
-        option("-i", "--insert").set(insertAndLoad).doc("Insert word and hash as full label if found in hash table")
+        value("text", input) % "Text value to hash",
+        option("-i", "--insert").set(insertAndLoad) % "Insert word and hash as full label if found in hash table"
         );
 
     parsing_result res = parse(argc, argv, cli);

@@ -46,54 +46,27 @@ int main(int argc, char** argv) {
 
 
   auto searchOrInsert = (
-    ((required("-i", "--insert")
-      .set(insert)
-      .doc("Insert generated combos into database (tagged as 'DISCOVERED')")
-      .if_conflicted([] { cout << "\033[31mYou can only choose one mode at a time\033[0m" << endl;})
-      & (option("-q", "--quality").doc("Quality level for inserted strings")
-        & value("quality").set(quality)))
-      | required("-s", "--search")
-      .set(search)
-      .doc("Match generated combos against provided hashes")
-      & values(is_hex, "usrHashes")
-      .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; }))
+    (
+      option("-i", "--insert").set(insert) % "Insert generated combos into database (tagged as 'DISCOVERED')",
+      option("-q", "--quality") % "Quality level for inserted strings"
+      & value("quality", quality)
+      )
+    |
+    (
+      required("-s", "--search").set(search) % "Match generated combos against provided hashes"
+      & values(is_hex, "usrHashes", usrHashesVec)
+      )
     );
 
   auto cli = (
-    command("parts")
-    .set(parts, true)
-    .doc("Generate possible combos with strings as parts")
-    & (values("newParts").if_missing([] { cout << "\033[31mMust provide list of parts\033[0m" << endl; })
-      .set(usrPartsVec)
-      & searchOrInsert) |
-    command("full")
-    .set(full, true)
-    .doc("Generate all combos with strings as full tags/ids")
-    .if_conflicted([] { cout << "\033[31mYou can only choose one type of gen at a time\033[0m" << endl;})
-    & (values("newFull").if_missing([] { cout << "\033[31mMust provide list of full labels\033[0m" << endl; })
-      .set(usrFullVec) & searchOrInsert
-      ) |
-    command("gen2").set(combos2, true).doc("Generate all 2 word combos") & (option("-s", "--search")
-      .set(search)
-      .doc("Match generated combos against provided hashes") & values(is_hex, "usrHashes")
-      .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; }),
-      (option("-i", "--insert")
-        .set(insert)
-        .doc("Insert generated combos into database (tagged as 'DISCOVERED')")
-        .if_conflicted([] { cout << "\033[31mYou can only choose one mode at a time\033[0m" << endl;})
-        & (option("-q", "--quality").doc("Quality level for inserted strings")
-          & value("quality").set(quality)))) |
-    command("gen3").set(combos3, true).doc("Generate all 3 word combos")
-    & (option("-s", "--search")
-      .set(search)
-      .doc("Match generated combos against provided hashes") & values(is_hex, "usrHashes")
-      .set(usrHashesVec).if_missing([] { cout << "\033[31mMust provide list of valid hashes\033[0m" << endl; }),
-      (option("-i", "--insert")
-        .set(insert)
-        .doc("Insert generated combos into database (tagged as 'DISCOVERED')")
-        .if_conflicted([] { cout << "\033[31mYou can only choose one mode at a time\033[0m" << endl;})
-        & (option("-q", "--quality").doc("Quality level for inserted strings")
-          & value("quality").set(quality))))
+    (
+      (command("parts").set(parts, true) % "Generate possible combos with strings as parts"
+        & values("newParts", usrPartsVec)) |
+      (command("full").set(full, true) % "Generate all combos with strings as full tags/ids"
+        & values("newFull", usrFullVec)) |
+      command("gen2").set(combos2, true) % "Generate all 2 word combos" |
+      command("gen3").set(combos3, true) % "Generate all 3 word combos"
+      ) & searchOrInsert
     );
 
   parsing_result result = parse(argc, argv, cli);

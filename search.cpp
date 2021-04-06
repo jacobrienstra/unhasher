@@ -23,31 +23,28 @@ int main(int argc, char** argv)
     bool search3 = true;
     bool searchSubStr = false;
     bool textSearch = false;
+    bool useKeywords = false;
     string input;
 
     vector<string> substrHashes;
+    vector<string> keywords;
 
     auto is_hex = [](const string& arg) {
         return regex_match(arg, regex("(0x)?[a-fA-F0-9]{8}"));
     };
 
     group cli = (
-        value("value")
-        .set(input)
-        .doc("Value to search for")
-        .if_missing([] { cout << endl << "\033[31mNo valid hash value provided\033[0m" << endl; }),
-        (option("-t", "--text")
-            .set(textSearch)
-            .doc("Search by text value instead of hash") |
-            (option("-3", "--search3")
-                .set(search3, false)
-                .doc("Search 3 word table too"),
-                (option("-s", "--substrSearch")
-                    .set(searchSubStr)
-                    & values(is_hex, "substrHashes", substrHashes)
-                    .if_missing([] { cout << endl << "\033[31m-s option requires valid hash list\033[0m" << endl;})
-                    )
-                .doc("Return only unhashes which are a substring of any unhash of the following hashes")))
+        joinable(
+            option("-t", "--text").set(textSearch) % "Search by text value instead of hash",
+            option("-e", "--search3").set(search3, false) % "Search 3 word table too"
+        ),
+        value("value", input) % "Value to search for",
+        option("-s", "--substrOf").set(searchSubStr)
+        & values(is_hex, "substrHashes", substrHashes) % "Return only unhashes which are a substring of any unhash of the following hashes"
+        |
+        option("-k", "--keywords").set(useKeywords) % "Highlight any occurences of provided keywords in printed results"
+        & values("keywords", keywords) % "Keywords to highlight"
+
         );
 
 
@@ -57,7 +54,7 @@ int main(int argc, char** argv)
         return 1;
     }
     if (!textSearch && !is_hex(input)) {
-        cout << endl << "\033[31mHash mode must receive hash as first positional argument\033[0m" << endl;
+        cout << endl << "\033[31mHash mode must receive valid hexidecimal hash\033[0m" << endl;
         cout << endl << make_man_page(cli, "Search") << endl;
         return 1;
     }
