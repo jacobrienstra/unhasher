@@ -25,7 +25,7 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/search",
-            "args": ["0xa65b9808", "-k", "Out"],
+            "args": ["common", "-h", "0xb72d045a", "0xf4c3335a"],
             "cwd": "${workspaceFolder}",
             // "environment": [],
             // "MIMode": "gdb"
