@@ -9,6 +9,7 @@
 
 
 
+
         {
             "name": "Load bad",
             "type": "lldb",
@@ -23,8 +24,8 @@
             "name": "Search",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/hash",
-            "args": ["-l", "R6_Enabled"],
+            "program": "${workspaceFolder}/search",
+            "args": ["0xa65b9808", "-k", "Out"],
             "cwd": "${workspaceFolder}",
             // "environment": [],
             // "MIMode": "gdb"

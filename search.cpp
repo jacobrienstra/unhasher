@@ -59,6 +59,18 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    function<void(pqxx::row::reference)> printer = [&useKeywords, &keywords](pqxx::row::reference text) {
+        if (useKeywords) {
+            for (auto it = keywords.begin(); it != keywords.end(); it++) {
+                if (text.as<string>().find(*it) != string::npos) {
+                    cout << "\033[32m" << text << "\033[0m" << endl;
+                    return;
+                }
+            }
+        }
+        cout << text << endl;
+    };
+
     pqxx::connection c{ "user=jacob host=localhost port=5432 dbname=dai connect_timeout=10" };
 
     string searchStr = c.quote(input);
@@ -139,7 +151,7 @@ int main(int argc, char** argv)
                     cout << std::hex << row[0].as<int>() << ": " << row[1] << endl;
                 }
                 else {
-                    cout << row[0] << endl;
+                    printer(row[0]);
                 }
             }
         }
@@ -156,7 +168,7 @@ int main(int argc, char** argv)
                     cout << std::hex << row[0].as<int>() << endl;
                 }
                 else {
-                    cout << row[0] << endl;
+                    printer(row[0]);
                 }
             }
         }
@@ -173,7 +185,7 @@ int main(int argc, char** argv)
                     cout << std::hex << row[0].as<int>() << endl;
                 }
                 else {
-                    cout << row[0] << endl;
+                    printer(row[0]);
                 }
             }
         }
@@ -191,7 +203,7 @@ int main(int argc, char** argv)
                         cout << std::hex << row[0].as<int>() << endl;
                     }
                     else {
-                        cout << row[0] << endl;
+                        printer(row[0]);
                     }
                 }
             }
