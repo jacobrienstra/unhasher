@@ -194,22 +194,23 @@ int main(int argc, char** argv)
     for (auto it = hashes.begin(); it != hashes.end(); it++) {
         string input = *it;
         string searchStr;
+        cout << endl << "\033[31m" << std::hex << input << ":\033[0m" << endl;
         if (!textSearch) {
             int hash = ((int)strtol((*it).c_str(), NULL, 16));
             searchStr = to_string(hash);
         }
         else {
-            searchStr = input;
+            searchStr = c.quote(input);
         }
         string retField = textSearch ? "hash" : "text";
         string searchField = textSearch ? "text" : "hash";
 
         pqxx::work wparts(c);
-        pqxx::result rparts = wparts.exec("SELECT " + retField + ", source FROM labels_parts WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC");
+        pqxx::result rparts = wparts.exec("SELECT " + retField + ", source FROM labels_parts WHERE " + searchField + " = " + searchStr + " ORDER BY quality ASC");
         wparts.commit();
 
         if (rparts.size() != 0) {
-            if (!searchCommon) cout << endl << "Found match(es) in label parts table:" << endl;
+            if (!searchCommon) cout << endl << "parts:" << endl;
             for (auto const& row : rparts) {
                 results++;
                 if (textSearch) {
@@ -227,11 +228,11 @@ int main(int argc, char** argv)
         }
 
         pqxx::work wfull(c);
-        pqxx::result rfull = wfull.exec("SELECT " + retField + " FROM labels_full WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC");
+        pqxx::result rfull = wfull.exec("SELECT " + retField + " FROM labels_full WHERE " + searchField + " = " + searchStr + " ORDER BY quality ASC");
         wfull.commit();
 
         if (rfull.size() != 0) {
-            if (!searchCommon) cout << endl << "Found match(es) in full labels table:" << endl;
+            if (!searchCommon) cout << endl << "full:" << endl;
             for (auto const& row : rfull) {
                 results++;
                 if (textSearch) {
@@ -249,11 +250,11 @@ int main(int argc, char** argv)
         }
 
         pqxx::work wgen2(c);
-        pqxx::result rgen2 = wgen2.exec("SELECT " + retField + " FROM labels_gen2 WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC, text ASC");
+        pqxx::result rgen2 = wgen2.exec("SELECT " + retField + " FROM labels_gen2 WHERE " + searchField + " = " + searchStr + " ORDER BY quality ASC, text ASC");
         wgen2.commit();
 
         if (rgen2.size() != 0) {
-            if (!searchCommon) cout << endl << "Found match(es) in 2 word generated labels table:" << endl;
+            if (!searchCommon) cout << endl << "gen2:" << endl;
             for (auto const& row : rgen2) {
                 results++;
                 if (textSearch) {
@@ -272,11 +273,11 @@ int main(int argc, char** argv)
 
         if (search3) {
             pqxx::work wgen3(c);
-            pqxx::result rgen3 = wgen3.exec("SELECT " + retField + " FROM labels_gen3 WHERE " + searchField + " = " + searchStr + "ORDER BY quality ASC, text ASC");
+            pqxx::result rgen3 = wgen3.exec("SELECT " + retField + " FROM labels_gen3 WHERE " + searchField + " = " + searchStr + " ORDER BY quality ASC, text ASC");
             wgen3.commit();
 
             if (rgen3.size() != 0) {
-                if (!searchCommon) cout << endl << "Found match(es) in 3 word generated labels table:" << endl;
+                if (!searchCommon) cout << endl << "gen3:" << endl;
                 for (auto const& row : rgen3) {
                     results++;
                     if (textSearch) {
@@ -306,7 +307,7 @@ int main(int argc, char** argv)
         }
 
         for (auto mt = results.begin(); mt != results.end(); mt++) {
-            if (mt->size() > 1) {
+            if (mt->size() >= hashes.size()) {
                 cout << endl;
                 for (auto el = mt->begin(); el != mt->end(); el++) {
                     cout << el->first << ": " << el->second << endl;
