@@ -4,7 +4,10 @@
 #include <string>
 #include <regex>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
 #include "clipp.h"
+#pragma clang diagnostic pop
 #include "types.h"
 #include "hasher.h"
 

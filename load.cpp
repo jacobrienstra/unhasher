@@ -11,7 +11,11 @@
 #include <iomanip>
 #include <pqxx/pqxx>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
 #include "clipp.h"
+#pragma clang diagnostic pop
+
 using namespace clipp;
 using namespace std;
 

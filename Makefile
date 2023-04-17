@@ -2,9 +2,9 @@
 CC = clang++
 
 # flags to pass compiler
-CPPFLAGS = -ggdb3 -O3 -fvisibility=hidden -fvisibility-inlines-hidden -std=c++17 -I/Applications/Postgres.app/Contents/Versions/13/include -Wall -Werror -Wextra
+CPPFLAGS = -ggdb3 -O3 -fvisibility=hidden -fvisibility-inlines-hidden -std=c++17 -I/Applications/Postgres.app/Contents/Versions/15/include -isystem/opt/homebrew/include -Wall -Werror -Wextra
 
-LIBS += -L/Applications/Postgres.app/Contents/Versions/13/lib -lpqxx -lpq
+LIBS += -L/Applications/Postgres.app/Contents/Versions/15/lib -L/opt/homebrew/lib -lpqxx -lpq
 
 # name for executable
 LOAD = load
@@ -12,7 +12,7 @@ GEN = gen
 HASH = hash
 SEARCH = search
 TEST = test
-UTIL = UTIL
+UTIL = util
 
 
 # space-separated list of header files
@@ -38,7 +38,9 @@ SEARCHOBJS = $(SEARCHSRCS:.cpp=.o)
 TESTOBJS = $(TESTSRCS:.cpp=.o)
 UTILOBJS = $(UTILSRCS:.cpp=.o)
 
+EXE = $(LOAD) $(GEN) $(HASH) $(SEARCH) $(TEST) $(UTIL)
 
+.PHONY: all
 all: $(LOAD) $(GEN) $(HASH) $(SEARCH) $(TEST) $(UTIL)
 
 # default target

@@ -6,7 +6,10 @@
 #include <unistd.h>
 #include <pqxx/pqxx>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
 #include "clipp.h"
+#pragma clang diagnostic pop
 #include "hasher.h"
 
 using namespace std;
@@ -31,7 +34,7 @@ int main(int argc, char* argv[])
 
     unsigned int hash = hasher(input.c_str(), 5381);
     char buf[10];
-    sprintf(buf, "%08x", hash);
+    snprintf(buf, 10, "%08x", hash);
     string hashStr = buf;
 
     cout << endl << hashStr << " " << (int)hash << endl << endl;

@@ -8,7 +8,10 @@
 #include <map>
 #include <pqxx/pqxx>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
 #include "clipp.h"
+#pragma clang diagnostic pop
 #include "loaddb.h"
 
 using namespace std;

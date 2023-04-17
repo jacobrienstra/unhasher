@@ -1,9 +1,5 @@
 {
   "files.associations": {
-    ".react.ts": "typescriptreact",
-    ".react.tsx": "typescriptreact",
-    ".tsx": "typescript",
-    ".ts": "typescript",
     "__bit_reference": "cpp",
     "__config": "cpp",
     "__debug": "cpp",
@@ -95,6 +91,14 @@
     "__functional_03": "cpp",
     "memory_resource": "cpp",
     "*.ipp": "cpp",
-    "__functional_base_03": "cpp"
-  }
+    "__functional_base_03": "cpp",
+    "__bits": "cpp",
+    "__verbose_abort": "cpp",
+    "clocale": "cpp",
+    "span": "cpp",
+    "compare": "cpp",
+    "concepts": "cpp",
+    "ranges": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "disabled"
 }
