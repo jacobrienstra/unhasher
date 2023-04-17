@@ -3,4 +3,5 @@
 !*/
 *.o
 !Makefile
-*/.DS_Store
+.DS_Store
+**/.DS_Store

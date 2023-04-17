@@ -1,0 +1,21 @@
+Unique tags: 10286
+Unique values: 6196337
+Unique id values: 1586329
+
+Tag Hashes: 0
+Value Hashes: 944539
+Id Hashes: 1558816
+
+Filtered tags: 10286
+Filtered values: 405278
+Filtered ids: 1856
+
+Tag parts: 3225
+Value parts: 32290
+Ids parts: 1668
+
+Tags that show up as values: 651
+Tags that show up as ids: 19
+
+Unused Tags and hashes: 43075
+Untranslated hashes used elsewhere as values: 2479480
